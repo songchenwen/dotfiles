@@ -1,0 +1,7 @@
+fish/fish_history
+fish/fish_read_history
+fish/fishd.*
+fish/functions/ssh*.fish
+fish/functions/ssh*.fish
+fish/generated_completions
+maid_rules/run.sh
