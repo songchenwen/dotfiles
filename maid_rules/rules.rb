@@ -7,24 +7,6 @@ Maid.rules do
 	rule "test_run" do
 		total_run()
 	end
-	
-	watch '~/Downloads' do
-		rule 'Downloads Change' do
-			newly()
-		end
-	end
-
-	watch '~/Desktop' do
-		rule 'Desktop Change' do	
-			newly()
-		end
-	end
-
-	watch '~/Movies/Video/' do
-		rule 'Video Change' do
-			newly()
-		end
-	end
 
 	repeat '10m' do
 		rule '10m' do
@@ -46,7 +28,6 @@ Maid.rules do
 	def newly
 		new_downloading()
 		new_added()
-		sleep(10)
 	end
 
 	def new_downloading
@@ -58,7 +39,15 @@ Maid.rules do
 	def new_added
 		sleep(2)
 		dir_not_downloading('~/{Downloads,Desktop}/*').each do |path|
-			add_tag(path, TagUnfinished) if !10.second.since?(added_at(path))
+			added = added_at(path)
+			if !10.minute.since?(added)
+				used = used_at(path)
+				if !used || used < added
+					if !has_tags?(path)
+						add_tag(path, TagUnfinished) 
+					end
+				end
+			end
 		end
 	end
 
@@ -95,7 +84,7 @@ Maid.rules do
 	def trash_old
 		dir_not_downloading('~/{Downloads,Desktop}/*').each do |path|
 			if File.directory?(path) && !is_empty_folder?(path)
-				log "ignore none empty folder #{path}"
+				log "trash ignore none empty folder #{path}"
 			else
 				trash(path) if !has_tags?(path) && 1.day.since?(used_at(path)) && 2.day.since?(added_at(path))
 			end
