@@ -8,7 +8,7 @@ function undo:addToStack(wins)
 	if self.skip then return end
     if not wins then wins = { hs.window.focusedWindow() } end
     local size = #self.stack
-    self.stack[size + 1] = getCurrentWindowsLayout(wins)
+    self.stack[size + 1] = self:getCurrentWindowsLayout(wins)
     size = size + 100
     if size > self.stackMax then
         for i = 1, size - self.stackMax do
@@ -34,7 +34,7 @@ function undo:undo()
     end
 end
 
-function getCurrentWindowsLayout(wins)
+function undo:getCurrentWindowsLayout(wins)
     if not wins then wins = { hs.window.focusedWindow() } end
     local current = {}
     for i = 1, #wins do

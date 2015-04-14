@@ -1,4 +1,5 @@
 hs.alert.closeAll()
+local ignored = require 'ignored'
 
 -- key define
 local hyper = {'ctrl', 'alt', 'cmd'}
@@ -58,6 +59,7 @@ function horizontalMove(direction)
     if not w or not w:isStandard() then return end
     local s = w:screen()
     if not s then return end
+    if ignored(w) then return end
     local g = hs.grid.get(w)
     g.y = 0
     g.h = hs.grid.GRIDHEIGHT
@@ -117,6 +119,8 @@ hs.hotkey.bind(hyperShift, 'left', function()
     if not w then 
         return
     end
+    if ignored(w) then return end
+
     local s = w:screen():toWest()
     if s then
         undo:addToStack()
@@ -129,6 +133,8 @@ hs.hotkey.bind(hyperShift, 'right', function()
     if not w then 
         return
     end
+    if ignored(w) then return end
+    
     local s = w:screen():toEast()
     if s then
         undo:addToStack()
@@ -137,131 +143,12 @@ hs.hotkey.bind(hyperShift, 'right', function()
 end)
 
 -- split view
-local splitMode = hs.hotkey.modal.new(hyper, 'down')
+SplitModal = require 'split_modal'
+local splitModal = SplitModal.new(hyper, 'down', undo)
 
-function splitMode:entered()
-    local app = hs.application.frontmostApplication()
-    if not app or not app:focusedWindow() or #app:visibleWindows() < 2 then
-        hs.alert('No Window to Split') 
-        splitMode:exit()
-        return
-    end
-    splitMode['hasBegan'] = false
-    splitMode['app'] = app
-    
-    local ws = app:visibleWindows()
-    local s = app:focusedWindow():screen()
-    if #ws == 2 then        
-        undo:addToStack({ ws[1], ws[2] })
-        undo.skip = true
-        splitMode['hasBegan'] = true
-        local oriFocus = app:focusedWindow()
-        local g = { x = 0, y = 0, w = hs.grid.GRIDWIDTH / 2, h = hs.grid.GRIDHEIGHT }
-        hs.grid.set(ws[1], g, s)
-        ws[1]:focus()
-        g.x = hs.grid.GRIDWIDTH / 2
-        hs.grid.set(ws[2], g, s)
-        ws[2]:focus()
-        oriFocus:focus()
-    end
-
-    hyperUp:disable()
-    hyperLeft:disable()
-    hyperRight:disable()
-
-    drawFocusMoving()
+function splitModal:hotkeysToDisable()
+    return {hyperUp, hyperRight, hyperLeft}
 end
-
-function splitMode:exited()
-    splitMode['hasBegan'] = false
-    splitMode['app'] = nil
-    drawFocusMoving()
-    undo.skip = false
-    hyperUp:enable()
-    hyperLeft:enable()
-    hyperRight:enable()
-end
-
-splitMode:bind({}, 'escape', function() 
-    splitMode:exit() 
-end)
-
-splitMode:bind({}, 'return', function() 
-    splitMode:exit() 
-end)
-
-local splitModeFocusRect = nil
-function drawFocusMoving()
-    if splitModeFocusRect then
-        splitModeFocusRect:delete()
-        splitModeFocusRect = nil
-    end
-    local app = splitMode['app']
-    if not app then return end
-    local w = app:focusedWindow()
-    if not w then return end
-    local f = w:frame()
-    if not f then return end
-    splitModeFocusRect = hs.drawing.rectangle(f)
-    splitModeFocusRect:setFill(false):
-        setStroke(true):
-        setStrokeWidth(4):
-        setStrokeColor({red = 0.4, green = 0.4, blue = 1, alpha = 0.9}):
-        show():bringToFront()
-end
-
-function moveBetweenWindows(direction)
-    local app = splitMode['app'];
-    if not app then 
-        splitMode:exit()
-        return
-    end
-    local current = app:focusedWindow()
-    local windows = app:visibleWindows()
-    local index = hs.fnutils.indexOf(windows, current)
-    if not index then
-        splitMode:exit()
-        return
-    end
-    index = index + direction
-    if index > #windows then
-        index = 1
-    end
-    if index < 1 then
-        index = #windows
-    end
-    windows[index]:focus()
-    drawFocusMoving()
-end
-
-
-splitMode:bind({}, 'up', function()
-    moveBetweenWindows(-1)
-end)
-
-splitMode:bind({}, 'down', function()
-    moveBetweenWindows(1)
-end)
-
-splitMode:bind({}, 'left', function()
-    if not splitMode['hasBegan'] then
-        undo:addToStack()
-        undo.skip = true
-        splitMode['hasBegan'] = true
-    end
-    horizontalMove(-1)
-    drawFocusMoving()
-end)
-
-splitMode:bind({}, 'right', function()
-    if not splitMode['hasBegan'] then
-        undo:addToStack()
-        undo.skip = true
-        splitMode['hasBegan'] = true
-    end
-    horizontalMove(1)
-    drawFocusMoving()
-end)
 
 -- App layout
 local AppLayout = {}
@@ -406,10 +293,12 @@ hs.hotkey.bind(hyper, 'escape', function() hs.reload() end )
 function getAllValidWindows ()
     local allWindows = hs.window.allWindows()
     local windows = {}
+    local index = 1
     for i = 1, #allWindows do
         local w = allWindows[i]
         if w:screen() then
-            table.insert(windows, w)
+            windows[index] = w
+            index = index + 1
         end
     end
     return windows
