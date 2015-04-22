@@ -188,7 +188,7 @@ function layoutApp(name, app, delayed)
         print('move app '..name..' to largerScreen')
         s = largerScreen
     end
-    if s and s ~= w:screen() then w:moveToScreen(s) end
+    if s and w:screen() and s ~= w:screen() then w:moveToScreen(s) end
 
     if conf.full then
         print('maximize app '..name)
