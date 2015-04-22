@@ -14,6 +14,24 @@ Maid.rules do
 		end
 	end
 
+	watch('~/Downloads', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
+		rule 'Downloads Change' do |modified, added, removed|
+			newly() if added.any?()
+		end
+	end
+
+	watch('~/Desktop', {wait_for_delay: 10}) do
+		rule 'Desktop Change' do |modified, added, removed|
+			newly() if added.any?()
+		end
+	end
+
+	watch('~/Movies/Video/', {wait_for_delay: 10}) do
+		rule 'Video Change' do |modified, added, removed|
+			newly() if added.any?()
+		end
+	end
+
 	def total_run
 		new_downloading()
 		new_added()
@@ -37,13 +55,12 @@ Maid.rules do
 	end
 
 	def new_added
-		sleep(2)
 		dir_not_downloading('~/{Downloads,Desktop}/*').each do |path|
-			added = added_at(path)
-			if !10.minute.since?(added)
-				used = used_at(path)
-				if !used || used < added
-					if !has_tags?(path)
+			unless has_tags?(path) 	
+				added = added_at(path)
+				if !10.minute.since?(added)
+					used = used_at(path)
+					if !used || used < added
 						add_tag(path, TagUnfinished) 
 					end
 				end
