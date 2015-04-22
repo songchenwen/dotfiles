@@ -8,12 +8,6 @@ Maid.rules do
 		total_run()
 	end
 
-	repeat '10m' do
-		rule '10m' do
-			total_run()
-		end
-	end
-
 	watch('~/Downloads', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
 		rule 'Downloads Change' do |modified, added, removed|
 			newly() if added.any?()
@@ -29,6 +23,23 @@ Maid.rules do
 	watch('~/Movies/Video/', {wait_for_delay: 10}) do
 		rule 'Video Change' do |modified, added, removed|
 			newly() if added.any?()
+		end
+	end
+
+	repeat '10m' do
+		rule '10m' do
+			total_run()
+		end
+	end
+
+	repeat '1d' do
+		rule 'Update System' do
+			pid = Process.spawn("brew update;brew upgrade")
+			Process.detach pid
+			pid = Process.spawn("npm update -g")
+			Process.detach pid
+			pid = Process.spawn("gem update")
+			Process.detach pid
 		end
 	end
 
