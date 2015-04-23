@@ -10,24 +10,31 @@ Maid.rules do
 
 	watch('~/Downloads', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
 		rule 'Downloads Change' do |modified, added, removed|
-			newly() if added.any?()
+			if added.any?()
+				newly() 
+				movie_in_downloads()
+				psd_in_downloads()
+			end
 		end
 	end
 
-	watch('~/Desktop', {wait_for_delay: 10}) do
+	watch('~/Desktop', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
 		rule 'Desktop Change' do |modified, added, removed|
 			newly() if added.any?()
 		end
 	end
 
-	watch('~/Movies/Video/', {wait_for_delay: 10}) do
+	watch('~/Movies/Video/', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
 		rule 'Video Change' do |modified, added, removed|
-			newly() if added.any?()
+			if added.any?()
+				newly()	
+				video_series()
+			end
 		end
 	end
 
-	repeat '10m' do
-		rule '10m' do
+	repeat '30m' do
+		rule '30m' do
 			total_run()
 		end
 	end
@@ -69,7 +76,7 @@ Maid.rules do
 		dir_not_downloading('~/{Downloads,Desktop}/*').each do |path|
 			unless has_tags?(path) 	
 				added = added_at(path)
-				if !10.minute.since?(added)
+				if !30.minute.since?(added)
 					used = used_at(path)
 					if !used || used < added
 						add_tag(path, TagUnfinished) 
