@@ -65,6 +65,17 @@ function horizontalMove(direction)
     g.h = hs.grid.GRIDHEIGHT
     direction = direction / math.abs(direction)
 
+    if g.x + g.w == hs.grid.GRIDWIDTH and g.x == 0 then
+        if direction < 0 then
+            g.w = g.w - direction
+            g.x = hs.grid.GRIDWIDTH - g.w
+        else
+            g.w = g.w + direction
+        end
+        undo:addToStack()
+        hs.grid.set(w, g, s)
+    end
+
     if g.x + g.w == hs.grid.GRIDWIDTH then
         g.w = g.w - direction
         local toMove = false

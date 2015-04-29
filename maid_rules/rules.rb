@@ -10,7 +10,7 @@ Maid.rules do
 
 	watch('~/Downloads', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
 		rule 'Downloads Change' do |modified, added, removed|
-			if added.any?()
+			if added.any?() || removed.any?()
 				newly() 
 				movie_in_downloads()
 				psd_in_downloads()
@@ -41,11 +41,9 @@ Maid.rules do
 
 	repeat '1d' do
 		rule 'Update System' do
-			pid = Process.spawn("brew update;brew upgrade")
+			pid = Process.spawn("brew update;brew upgrade --all")
 			Process.detach pid
 			pid = Process.spawn("npm update -g")
-			Process.detach pid
-			pid = Process.spawn("gem update")
 			Process.detach pid
 		end
 	end
