@@ -7,10 +7,11 @@ FILE_END_SECONDS = 9 * 60
 TAG_UNFINISHED = '未完'
 
 local path
+local timer
 
 function markFinished()
-	osdShow('Unobserve progress')
-	mp.unobserve_property(checkTimeRemaining)
+	osdShow('Stop checking progress')
+	if timer then timer.stop() end
 
 	if not path then return end
 
@@ -53,11 +54,15 @@ end
 function onNewFile(event)
 	path = mp.get_property('path')
 	osdShow('New file '..path)
-	mp.unobserve_property(checkTimeRemaining)
+	if timer then timer.stop() end
 	if hasUnfinishedTag() then
-		mp.msg.info('Observe progress for', path)
-		osdShow('Observe progress')
-		mp.observe_property('time-remaining', 'number', checkTimeRemaining)
+		mp.msg.info('Start checking progress for', path)
+		osdShow('Start checking progress')
+		if timer then
+			timer.resume()
+		else
+			timer = mp.add_periodic_timer(30, checkTimeRemaining)
+		end
 	end
 end
 
@@ -65,7 +70,8 @@ function osdShow(msg)
 	if DEBUG then mp.osd_message(msg) end
 end
 
-function checkTimeRemaining(name, timeRemaining)
+function checkTimeRemaining()
+	local timeRemaining = mp.get_property_number("time-remaining", FILE_END_SECONDS)
 	if timeRemaining < FILE_END_SECONDS then 
 		markFinished()
 	end

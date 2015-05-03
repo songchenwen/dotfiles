@@ -71,7 +71,7 @@ Maid.rules do
 	end
 
 	def new_added
-		dir_not_downloading('~/{Downloads,Desktop}/*').each do |path|
+		dir_not_downloading('~/{Downloads,Desktop,Movies/Video}/*').each do |path|
 			unless has_tags?(path) 	
 				added = added_at(path)
 				if !30.minute.since?(added)
