@@ -5,7 +5,7 @@ function rmvb2mp4 --argument-name INPUT -d "Convert RMVB to MP4 by ffmpeg"
 		
 		echo "Convert $INPUT to $OUTPUT"
 		
-		ffmpeg -loglevel error -i $INPUT -c:v libx264 -preset veryfast -crf 18 -c:a copy $OUTPUT
+		ffmpeg -loglevel error -i $INPUT -c:v libx264 -preset veryfast -crf 18 -c:a copy -map_metadata -1 $OUTPUT
 
 	else
 		set_color red
