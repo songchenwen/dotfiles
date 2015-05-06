@@ -16,6 +16,4 @@ echo "mpv configuring"
 cd ~/.config
 
 ln -Fs "$MPVDIR"
-mkdir -p "$MPVDIR/tmp"
 mkdir -p "$MPVDIR/watch_later"
-touch "$MPVDIR/tmp/icc-cache"

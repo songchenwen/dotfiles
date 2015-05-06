@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<root>
+    <item>
+        <name>Remap F19 to Hyper</name>
+        <appendix>OS X doesn't have a Hyper. This maps F19 to Control + Shift + Option + Command. And you should use Seil to map Caps Lock to F19.</appendix>
+
+        <identifier>space_cadet.left_control_to_hyper</identifier>
+
+        <autogen>
+            --KeyToKey--
+            KeyCode::F19,
+
+            KeyCode::COMMAND_L,
+            ModifierFlag::OPTION_L | ModifierFlag::CONTROL_L
+        </autogen>
+    </item>
+
+    <item>
+        <name>Disable Minimize</name>
+        <identifier>private.disable_minimize</identifier>
+        <autogen>
+            __KeyToKey__
+            KeyCode::M, ModifierFlag::COMMAND_L,
+            KeyCode::M, ModifierFlag::COMMAND_L | ModifierFlag::FN
+        </autogen>
+        <autogen>
+            __KeyToKey__
+            KeyCode::M, ModifierFlag::COMMAND_L | ModifierFlag::FN,
+            KeyCode::M, ModifierFlag::COMMAND_L
+        </autogen>
+    </item>
+</root>

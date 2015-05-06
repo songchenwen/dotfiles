@@ -6,3 +6,4 @@ sh "$ITEMDIR/../brew/install.sh"
 brew install aria2 git opencc tag openssl duck
 brew link openssl
 brew link git
+brew install Caskroom/cask/xquartz

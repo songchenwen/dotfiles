@@ -7,20 +7,17 @@ FILE_END_SECONDS = 9 * 60
 TAG_UNFINISHED = '未完'
 
 local path
-local timer
 
 function markFinished()
 	osdShow('Stop checking progress')
-	if timer then timer.stop() end
-
-	if not path then return end
-
-	mp.msg.info('Mark finished', path)
-	local result = utils.subprocess({args = {'/usr/local/bin/tag', '-r', TAG_UNFINISHED, path}, cancellable = false})
-	path = nil
-	
-	if result.status == 0 then 
-		mp.osd_message('Finished')
+	if path then  
+		mp.msg.info('Mark finished', path)
+		local result = utils.subprocess({args = {'/usr/local/bin/tag', '-r', TAG_UNFINISHED, path}, cancellable = false})
+		path = nil
+		
+		if result.status == 0 then 
+			mp.osd_message('Finished')
+		end
 	end
 end
 
@@ -54,15 +51,10 @@ end
 function onNewFile(event)
 	path = mp.get_property('path')
 	osdShow('New file '..path)
-	if timer then timer.stop() end
 	if hasUnfinishedTag() then
 		mp.msg.info('Start checking progress for', path)
 		osdShow('Start checking progress')
-		if timer then
-			timer.resume()
-		else
-			timer = mp.add_periodic_timer(30, checkTimeRemaining)
-		end
+		mp.add_timeout(30, checkTimeRemaining)
 	end
 end
 
@@ -74,6 +66,8 @@ function checkTimeRemaining()
 	local timeRemaining = mp.get_property_number("time-remaining", FILE_END_SECONDS)
 	if timeRemaining < FILE_END_SECONDS then 
 		markFinished()
+	else
+		mp.add_timeout(30, checkTimeRemaining)
 	end
 end
 
