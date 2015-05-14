@@ -45,6 +45,8 @@ Maid.rules do
 			Process.detach pid
 			pid = Process.spawn("npm update -g")
 			Process.detach pid
+			pid = Process.spawn("node ~/Documents/dotfiles/bloomfilter-pac/index.js")
+			Process.detach pid
 		end
 	end
 
