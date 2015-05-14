@@ -1,6 +1,8 @@
 [submodule "bloomfilter-pac"]
 	path = bloomfilter-pac
 	url = git@github.com:songchenwen/bloomfilter-pac.git
+	branch = master
 [submodule "powerline-fonts-patch"]
 	path = powerline-fonts-patch
 	url = git@github.com:powerline/fonts.git
+	branch = master
