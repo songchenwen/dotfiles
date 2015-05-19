@@ -10,8 +10,9 @@ if test ! $(which mpv); then
 	brew linkapps mpv
 fi
 
-
 echo "mpv configuring"
+
+mkdir -p ~/.config
 
 cd ~/.config
 

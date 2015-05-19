@@ -8,27 +8,26 @@ Maid.rules do
 		total_run()
 	end
 
-	watch('~/Downloads', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
-		rule 'Downloads Change' do |modified, added, removed|
-			if added.any?() || removed.any?()
-				newly() 
-				movie_in_downloads()
-				psd_in_downloads()
-			end
+	watch '~/Downloads' do
+		rule 'Downloads Change' do
+			newly() 
+			movie_in_downloads()
+			psd_in_downloads()
 		end
 	end
 
-	watch('~/Desktop', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
+	watch '~/Desktop' do
 		rule 'Desktop Change' do |modified, added, removed|
 			newly() if added.any?()
 		end
 	end
 
-	watch('~/Movies/Video/', {wait_for_delay: 10, ignore: [/\.crdownload$/, /\.download$/, /\.aria2$/, /\.td$/, /\.td.cfg$/]}) do
+	watch '~/Movies/Video/' do
 		rule 'Video Change' do |modified, added, removed|
 			if added.any?()
 				newly()	
 				video_series()
+				video_convert()
 			end
 		end
 	end
@@ -45,6 +44,8 @@ Maid.rules do
 			Process.detach pid
 			pid = Process.spawn("npm update -g")
 			Process.detach pid
+			pid = Process.spawn("gem update !psych")
+			Process.detach pid
 			pid = Process.spawn("node ~/Documents/dotfiles/bloomfilter-pac/index.js")
 			Process.detach pid
 		end
@@ -59,6 +60,7 @@ Maid.rules do
 		file_openned()
 		trash_old()
 		video_series()
+		video_convert()
 	end
 
 	def newly
@@ -193,6 +195,34 @@ Maid.rules do
 		end
 	end
 
+	def video_convert
+		if is_on_battery?() 
+			return 
+		end
+		where_content_type(dir_not_downloading('~/Movies/{Video/,Video/**/}*\.{rmvb,flv}'), ['video', 'public.movie']).each do |path|
+			if not contains_tag?(path, TagUnfinished) then
+				return
+			end
+			path = expand(path)
+			p = Pathname.new(path)
+			ext = p.extname()
+			out = path[0, path.length - ext.length] + ".mkv"
+			if File.exist?(out) then
+				return
+			end
+			if path =~ /\.rmvb$/
+				log "convert #{path}"
+				cmd("ffmpeg -i #{sh_escape(path)} -c:v libx264 -preset veryfast -crf 18 -c:a copy -map_metadata -1 #{sh_escape(out)} && rm #{sh_escape(path)}")
+				add_tag(out, TagUnfinished)
+			end
+			if path =~ /\.flv$/
+				log "convert #{path}"
+				cmd("ffmpeg -i #{sh_escape(path)} -c copy #{sh_escape(out)} && rm #{sh_escape(path)}")
+				add_tag(out, TagUnfinished)
+			end
+		end
+	end
+
 	TagUnfinished = "未完"
 	TagWork = "工作"
 	TagPersonal = "个人"
@@ -200,114 +230,24 @@ Maid.rules do
 	TagFavorite = "最爱"
 	TagSystem = "系统"
 
-	def tags(path)
-		path = sh_escape(expand(path))
-		raw = cmd("tag -lN #{path}")
-		raw.strip.split(',')
-	end
-
-	def has_tags?(path)
-		ts = tags(path)
-		ts && ts.count > 0
-	end
-
-	def contains_tag?(path, tag)
-		path = expand(path)
-		ts = tags(path)
-		ts.include? tag
-	end
-
-	def add_tag(path, tag)
-		path = expand(path)
-		ts = Array(tag).join(",")
-		log "add tags #{ts} to #{path}"
-		cmd("tag -a #{ts} #{sh_escape(path)}")
-	end
-
-	def remove_tag(path, tag)
-		path = expand(path)
-		ts = Array(tag).join(",")
-		puts "remove tags #{ts} from #{path}"
-		log "remove tags #{ts} from #{path}"
-		`tag -r "#{ts}" "#{path}"`
-	end
-
-	def set_tag(path, tag)
-		path = expand(path)
-		ts = Array(tag).join(",")
-		puts "set tags #{ts} to #{path}"
-		log "set tags #{ts} to #{path}"
-		`tag -s "#{ts}" "#{path}"`
-	end
-
-	def tools_downloading?(path)
-		aria2_downloading?(path) || thunder_downloading?(path)
-	end
-
-	def aria2_downloading?(path)
-		File.exist?("#{path}.aria2") || path =~ /\.aria2$/
-	end
-
-	def thunder_downloading?(path)
-		path =~ /\.td$/ || path =~ /\.td.cfg$/
-	end
-
-	def hidden(path)
-		attribute = 'kMDItemFSInvisible'
-		raw = cmd("mdls -raw -name #{attribute} #{ sh_escape(path) }")
-		return raw == '1'
-	end
-
-	def has_been_used?(path)
-		path = expand(path)
-		raw = cmd("mdls -raw -name kMDItemLastUsedDate #{ sh_escape(path) }")
-		if raw == "(null)"
-			return false
-		end
-		begin
-			DateTime.parse(raw).to_time
-			return true
-		rescue Exception => e
-			return false
-		end
-	end
-
-	def used_at(path)
-		path = expand(path)
-		raw = cmd("mdls -raw -name kMDItemLastUsedDate #{ sh_escape(path) }")
-		if raw == "(null)"
-			return 3650.day.ago
-		end
-		begin
-			return DateTime.parse(raw).to_time
-		rescue Exception => e
-			return accessed_at(path)
-		end
-	end
-
-	def added_at(path)
-		path = expand(path)
-		raw = cmd("mdls -raw -name kMDItemDateAdded #{ sh_escape(path) }")
-		if raw == "(null)"
-			return 1.second.ago
-		end
-		begin
-			return DateTime.parse(raw).to_time
-		rescue Exception => e
-			return created_at(path)
-		end
-	end
-
 	def is_empty_folder?(path)
-		File.directory?(path) && dir("#{path}/*").select { |p| !hidden(p) }.count == 0
+		File.directory?(path) && dir("#{path}/*").select { |p| !hidden?(p) }.count == 0
+	end
+
+	def is_on_battery?
+		if cmd("pmset -g ps | grep AC").length > 0
+			return false
+		else
+			return true
+		end
 	end
 	
 	def dir_downloading(path)
-		dir(path).select { |p| !hidden(p) && (downloading?(p) || tools_downloading?(p))}
+		dir(path).select { |p| !hidden?(p) && downloading?(p) }
 	end
 
 	def dir_not_downloading(path)
-		dir_safe(path).reject { |path| hidden(path) || downloading?(path) || tools_downloading?(path)}
+		dir_safe(path).reject { |path| hidden?(path) }
 	end
 
 end

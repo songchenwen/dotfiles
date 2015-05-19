@@ -1,0 +1,4 @@
+--external-downloader aria2c 
+--external-downloader-args '-c -x10 -s10'
+--output '%(title)s.%(ext)s'
+--exec 'sh ~/.config/youtube-dl/post_convert.sh {}'
