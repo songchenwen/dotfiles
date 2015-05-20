@@ -76,7 +76,7 @@ Maid.rules do
 
 	def new_added
 		dir_not_downloading('~/{Downloads,Desktop,Movies/Video}/*').each do |path|
-			unless has_tags?(path) 	
+			unless has_tags?(path) || File.directory?(path)	
 				added = added_at(path)
 				if !30.minute.since?(added)
 					used = used_at(path)
@@ -145,54 +145,37 @@ Maid.rules do
 		end
 	end
 
+	VideoSeriesNameMinPrefixLength = 3
+	VideoSeriesNameMaxPrefixLength = 20
+
 	def video_series
-		rootDir = expand('~/Movies/Video/')
-		folders = []
-		dir_not_downloading('~/Movies/Video/*').each do |path|
-			if File.directory?(path)
-				folders.push(path[rootDir.length + 1, path.length - rootDir.length - 1])
-			end
-		end
-		if folders.any?
-			where_content_type(dir_not_downloading('~/Movies/Video/*'), ['video', 'public.movie']).each do |path|
-				p = Pathname.new(expand(path))
-				if p.dirname.to_s == rootDir
-					name = p.basename.to_s.split('.')
-					if name.count > 0
-						name = name[0]
-						move(path, "~/Movies/Video/#{name}") if folders.include?(name)
+		where_content_type(dir_not_downloading('~/Movies/Video/*'), ['video', 'public.movie']).each do |path|
+			path = expand(path)
+			p = Pathname.new(path)
+			name = p.basename.to_s
+			prefix = name[0, VideoSeriesNameMinPrefixLength]
+			sameSeriesInFolder = where_content_type(dir_not_downloading("~/Movies/Video/*/#{prefix}*"), ['video', 'public.movie'])
+			if sameSeriesInFolder.any? then
+				move(path, Pathname.new(expand(sameSeriesInFolder[0])).dirname.to_s)
+			else
+				sameSeries = where_content_type(dir_not_downloading("~/Movies/Video/#{prefix}*"), ['video', 'public.movie'])
+				if sameSeries.any? { |e| expand(e) != path } then
+					first = Pathname.new(expand(sameSeries[0])).basename.to_s
+					prefixLength = VideoSeriesNameMinPrefixLength
+					VideoSeriesNameMinPrefixLength.upto([name.length, first.length, VideoSeriesNameMaxPrefixLength].min) do |i|
+						prefixLength = i
+						if not name[0, i] == first[0, i] then
+							break
+						end
 					end
+					folderName = name[0, prefixLength]
+					dest = "~/Movies/Video/#{folderName}"
+					mkdir(dest)
+					move(path, dest)
 				end
 			end
 		end
 
-		first = []
-		second = []
-		where_content_type(dir_not_downloading('~/Movies/Video/*'), ['video', 'public.movie']).each do |path|
-			rootDir = expand('~/Movies/Video')
-			p = Pathname.new(expand(path))
-			if p.dirname.to_s == rootDir
-				name = p.basename.to_s.split('.')
-				if name.count > 0
-					name = name[0]
-					second.push(name) if !second.include?(name) && first.include?(name)
-					first.push(name) if !first.include?(name)
-				end
-			end
-		end
-		if second.any?
-			second.each do |name|
-				where_content_type(dir_not_downloading("~/Movies/Video/#{name}*"), ['video', 'public.movie']).each do |path|
-					rootDir = expand('~/Movies/Video')
-					p = Pathname.new(expand(path))
-					dest = "~/Movies/Video/#{name}"
-					mkdir(dest)
-					if p.dirname.to_s == rootDir
-						move(path, dest)
-					end
-				end
-			end
-		end
 	end
 
 	def video_convert

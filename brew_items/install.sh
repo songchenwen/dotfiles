@@ -7,3 +7,4 @@ brew install aria2 git opencc tag openssl youtube-dl
 brew link openssl -f
 brew link git
 brew install Caskroom/cask/xquartz
+brew install Caskroom/cask/gpgtools

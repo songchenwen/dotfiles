@@ -2,7 +2,7 @@
 
 GEMITEMSDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-APPS=( cocoapods github-pages lunchy )
+APPS=( cocoapods github-pages lunchy bundler )
 
 if test ! $(which rvm); then
 	sh "$GEMITEMSDIR/../rvm/install.sh"
