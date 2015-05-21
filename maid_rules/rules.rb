@@ -5,12 +5,12 @@ require 'pathname'
 
 Maid.rules do
 	rule "test_run" do
-		total_run()
+		total_run
 	end
 
 	watch '~/Downloads' do
-		rule 'Downloads Change' do
-			newly() 
+		rule 'Downloads Change' do |modified, added, removed|
+			new_added(added) 
 			movie_in_downloads()
 			psd_in_downloads()
 		end
@@ -18,14 +18,14 @@ Maid.rules do
 
 	watch '~/Desktop' do
 		rule 'Desktop Change' do |modified, added, removed|
-			newly() if added.any?()
+			new_added(added)
 		end
 	end
 
 	watch '~/Movies/Video/' do
 		rule 'Video Change' do |modified, added, removed|
 			if added.any?()
-				newly()	
+				new_added(added)	
 				video_series()
 				video_convert()
 			end
@@ -52,8 +52,6 @@ Maid.rules do
 	end
 
 	def total_run
-		new_downloading()
-		new_added()
 		movie_in_downloads()
 		psd_in_downloads()
 		dmg_in_downloads()
@@ -63,26 +61,11 @@ Maid.rules do
 		video_convert()
 	end
 
-	def newly
-		new_downloading()
-		new_added()
-	end
-
-	def new_downloading
-		dir_downloading('~/{Downloads,Desktop,Movies/Video}/*').each do |path|
-			add_tag(path, TagUnfinished)
-		end
-	end
-
-	def new_added
-		dir_not_downloading('~/{Downloads,Desktop,Movies/Video}/*').each do |path|
-			unless has_tags?(path) || File.directory?(path)	
-				added = added_at(path)
-				if !30.minute.since?(added)
-					used = used_at(path)
-					if !used || used < added
-						add_tag(path, TagUnfinished) 
-					end
+	def new_added(added)
+		if added && added.any? then
+			added.each do |path|
+				unless has_tags?(path) || File.directory?(path)
+					add_tag(path, TagUnfinished) unless has_been_used?(path)
 				end
 			end
 		end
@@ -123,25 +106,25 @@ Maid.rules do
 			if File.directory?(path) && !is_empty_folder?(path)
 				log "trash ignore none empty folder #{path}"
 			else
-				trash(path) if !has_tags?(path) && 1.day.since?(used_at(path)) && 2.day.since?(added_at(path))
+				trash(path) if !has_tags?(path) && has_been_used?(path) && 1.day.since?(used_at(path)) && 2.day.since?(added_at(path))
 			end
 		end
 
 		where_content_type(dir_not_downloading('~/Movies/Video/*'), ['video', 'public.movie']).each do |path|
-			trash(path) if !has_tags?(path) && 1.day.since?(used_at(path))
+			trash(path) if !has_tags?(path) && has_been_used?(path) && 1.day.since?(used_at(path))
 		end
 		where_content_type(dir_not_downloading('~/Movies/Video/**/*'), ['video', 'public.movie']).each do |path|
-			trash(path) if !has_tags?(path) && 1.day.since?(used_at(path))
+			trash(path) if !has_tags?(path) && has_been_used?(path) && 1.day.since?(used_at(path))
 		end
 
 		dir_not_downloading('~/Movies/Video/*').each do |path|
 			if is_empty_folder?(path)
-				remove(path) if 1.day.since?(used_at(path))
+				remove(path) if has_been_used?(path) && 1.day.since?(used_at(path))
 			end
 		end
 
 		dir('~/.Trash/*').each do |path|
-			remove(path) if 1.week.since?(used_at(path))
+			remove(path) if 1.week.since?(added_at(path))
 		end
 	end
 
@@ -154,12 +137,18 @@ Maid.rules do
 			p = Pathname.new(path)
 			name = p.basename.to_s
 			prefix = name[0, VideoSeriesNameMinPrefixLength]
-			sameSeriesInFolder = where_content_type(dir_not_downloading("~/Movies/Video/*/#{prefix}*"), ['video', 'public.movie'])
+			sameSeriesInFolder = where_content_type(dir_not_downloading("~/Movies/Video/*/#{prefix}*"), ['video', 'public.movie']).reject do |e|
+				ep = Pathname.new(e)
+				expand(e) == path || ep.basename.to_s[0..(0 - ep.extname().length)] == name[0..(0 - p.extname().length)]	
+			end
 			if sameSeriesInFolder.any? then
 				move(path, Pathname.new(expand(sameSeriesInFolder[0])).dirname.to_s)
 			else
-				sameSeries = where_content_type(dir_not_downloading("~/Movies/Video/#{prefix}*"), ['video', 'public.movie'])
-				if sameSeries.any? { |e| expand(e) != path } then
+				sameSeries = where_content_type(dir_not_downloading("~/Movies/Video/#{prefix}*"), ['video', 'public.movie']).reject do |e|
+					ep = Pathname.new(e)
+					expand(e) == path || ep.basename.to_s[0..(0 - ep.extname().length)] == name[0..(0 - p.extname().length)]
+				end
+				if sameSeries.any? then
 					first = Pathname.new(expand(sameSeries[0])).basename.to_s
 					prefixLength = VideoSeriesNameMinPrefixLength
 					VideoSeriesNameMinPrefixLength.upto([name.length, first.length, VideoSeriesNameMaxPrefixLength].min) do |i|
