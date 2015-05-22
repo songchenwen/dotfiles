@@ -18,6 +18,8 @@ cd ~/.config
 
 ln -Fs "$MPVDIR"
 mkdir -p "$MPVDIR/watch_later"
+mkdir -p "$MPVDIR/tmp"
+touch "$MPVDIR/tmp/icc-cache"
 
 APPFILE=/Applications/mpv.app
 
