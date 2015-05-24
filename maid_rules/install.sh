@@ -17,7 +17,7 @@ if [ ! -e "$RUNSH" ]; then
    	echo "Maid generating run.sh"
    	PATHTORUBY=$(which ruby)
    	PATHTOMAID=$(which maid)
-   	cat "$MAIDDIR/run.sh.temp" | sed "s|PATHTORUBY|$PATHTORUBY|" | sed "s|PATHTOMAID|$PATHTOMAID|" > $RUNSH
+   	cat "$MAIDDIR/run.sh.temp" | sed "s|PATHTORUBY|$PATHTORUBY|" | sed "s|PATHTOMAID|$PATHTOMAID|" | sed "s|HOMEPATH|$HOME|" > $RUNSH
    	chmod +x $RUNSH
 fi
 
