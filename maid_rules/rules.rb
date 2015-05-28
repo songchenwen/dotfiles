@@ -32,8 +32,8 @@ Maid.rules do
 		end
 	end
 
-	repeat '30m' do
-		rule '30m' do
+	repeat '15m' do
+		rule '15m' do
 			total_run()
 		end
 	end
