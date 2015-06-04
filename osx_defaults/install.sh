@@ -6,10 +6,10 @@
 ###############################################################################
 
 # Disable smart quotes as they’re annoying when typing code
-sudo defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
 
 # Disable smart dashes as they’re annoying when typing code
-sudo defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
 
 
 ###############################################################################
@@ -17,12 +17,10 @@ sudo defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool fals
 ###############################################################################
 
 # Trackpad: enable tap to click for this user and for the login screen
-sudo defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-sudo defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-sudo defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+defaults write com.apple.AppleMultitouchTrackpad Clicking -bool YES
 
 # Set a blazingly fast keyboard repeat rate
-sudo defaults write NSGlobalDomain KeyRepeat -int 0
+defaults write NSGlobalDomain KeyRepeat -int 0
 
 
 ###############################################################################

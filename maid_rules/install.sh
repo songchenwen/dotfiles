@@ -7,6 +7,11 @@ if test ! $(which maid); then
 	gem install maid
 fi
 
+if test ! $(which cpulimit); then
+	sh "$MAIDDIR/../brew/install.sh"
+	brew install cpulimit
+fi
+
 echo "Maid configuring rules"
 
 cd ~/.config
@@ -17,7 +22,8 @@ if [ ! -e "$RUNSH" ]; then
    	echo "Maid generating run.sh"
    	PATHTORUBY=$(which ruby)
    	PATHTOMAID=$(which maid)
-   	cat "$MAIDDIR/run.sh.temp" | sed "s|PATHTORUBY|$PATHTORUBY|" | sed "s|PATHTOMAID|$PATHTOMAID|" | sed "s|HOMEPATH|$HOME|" > $RUNSH
+   	PATHCPULIMIT=$(which cpulimit)
+   	cat "$MAIDDIR/run.sh.temp" | sed "s|PATHCPULIMIT|$PATHCPULIMIT|" | sed "s|PATHTORUBY|$PATHTORUBY|" | sed "s|PATHTOMAID|$PATHTOMAID|" | sed "s|HOMEPATH|$HOME|" > $RUNSH
    	chmod +x $RUNSH
 fi
 
