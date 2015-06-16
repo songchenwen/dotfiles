@@ -24,6 +24,7 @@ local key2App = {
     f = 'Finder',
     t = 'iTerm',
     n = 'Newsflow',
+    c = 'Numi'
 }
 for key, app in pairs(key2App) do
 	hs.hotkey.bind(hyper, key, function() hs.application.launchOrFocus(app) end)
