@@ -22,7 +22,7 @@ Maid.rules do
 		end
 	end
 
-	watch '~/Movies/Video/' do
+	watch '~/Movies/Video' do
 		rule 'Video Change' do |modified, added, removed|
 			if added.any?()
 				new_added(added)	
@@ -62,6 +62,11 @@ Maid.rules do
 	end
 
 	def new_added(added)
+		added =	added.select do |path|
+			path = expand(path)
+			p = Pathname.new(path)
+			p.dirname.to_s == expand('~/Movies/Video') || p.dirname.to_s == expand('~/Desktop') || p.dirname.to_s == expand('~/Downloads')
+		end
 		if added && added.any? then
 			added.each do |path|
 				unless has_tags?(path) || File.directory?(path)
