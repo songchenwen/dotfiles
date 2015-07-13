@@ -202,7 +202,7 @@ function layoutApp(name, app, delayed)
     end
     if s and w:screen() and s ~= w:screen() then w:moveToScreen(s) end
 
-    if conf.full then
+    if conf.full and w:screen() then
         print('maximize app '..name)
         w:maximize()
     end
