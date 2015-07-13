@@ -407,8 +407,13 @@ end
 
 function prompt_cmd_duration -d 'Displays the elapsed time of last command'
   if set -q CMD_DURATION
-	prompt_arrow_right_close 083743 fdf6e3
-	printf "$CMD_DURATION"
+  	if test $CMD_DURATION -gt 1000
+		prompt_arrow_right_close 083743 fdf6e3
+		set DUR (math $CMD_DURATION/1000)
+		printf "$DUR"
+		printf "s"
+		set -e DUR
+	end
   end
 end
 

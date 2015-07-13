@@ -9,5 +9,7 @@
 [user]
 	name = songchenwen
 	email = sanvinsung@gmail.com
+[rebase]
+	autosquash = true
 [push]
 	default = simple
