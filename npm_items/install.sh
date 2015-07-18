@@ -2,7 +2,7 @@
 
 NPMITEMSDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-APPS=( trash yo generator-hubot coffee-script )
+APPS=( trash yo generator-hubot coffee-script nw )
 
 if test ! $(which node); then
 	sh "$NPMITEMSDIR/../nodejs/install.sh"

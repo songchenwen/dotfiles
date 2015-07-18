@@ -1,6 +1,7 @@
-set -x ANDROID_HOME ~/Documents/android-sdk-macosx
+set -x ANDROID_HOME /usr/local/opt/android-sdk
+set -x ANDROID_NDK_HOME /usr/local/opt/android-ndk
 
-set -x PATH $HOME/.rvm/scripts/rvm $ANDROID_HOME/build-tools/19.1.0 $ANDROID_HOME/platform-tools $PATH
+set -x PATH $HOME/.rvm/scripts/rvm $ANDROID_HOME/bin $ANDROID_HOME/tools $ANDROID_NDK_HOME/bin $PATH
 
 set -x LSCOLORS gxBxhxDxfxhxhxhxhxcxcx
 
