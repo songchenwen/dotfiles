@@ -10,3 +10,7 @@ source ~/.config/fish/z.fish
 source ~/.config/fish/rvm.load
 
 abbr -a s2t 'pbpaste | opencc -c s2twp.json | pbcopy'
+abbr -a g git
+abbr -a p pod
+abbr -a pu pod update --no-repo-update
+abbr -a pi pod install --no-repo-update
