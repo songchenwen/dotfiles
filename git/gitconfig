@@ -8,7 +8,7 @@
 	trustExitCode = true
 [user]
 	name = songchenwen
-	email = sanvinsung@gmail.com
+	email = me@songchenwen.com
 [rebase]
 	autosquash = true
 [push]
