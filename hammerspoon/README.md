@@ -18,4 +18,4 @@
 
 ## Chinese Post
 
-[here](http://songchenwen.github.io/tech/2015/04/02/hammerspoon-mac-window-manager/)
+[here](http://songchenwen.com/tech/2015/04/02/hammerspoon-mac-window-manager/)
