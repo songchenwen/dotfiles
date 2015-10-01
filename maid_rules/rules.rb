@@ -176,7 +176,7 @@ Maid.rules do
 		if is_on_battery?() 
 			return 
 		end
-		where_content_type(dir_not_downloading('~/Movies/{Video/,Video/**/}*\.{rmvb,flv}'), ['video', 'public.movie']).each do |path|
+		where_content_type(dir_not_downloading('~/Movies/{Video/,Video/**/,Video/**/**/}*\.{rmvb,flv}'), ['video', 'public.movie']).each do |path|
 			if not contains_tag?(path, TagUnfinished) then
 				return
 			end
@@ -189,7 +189,7 @@ Maid.rules do
 			end
 			if path =~ /\.rmvb$/
 				log "convert #{path}"
-				cmd("ffmpeg -i #{sh_escape(path)} -c:v libx264 -preset veryfast -crf 18 -c:a copy -map_metadata -1 #{sh_escape(out)} && rm #{sh_escape(path)}")
+				cmd("ffmpeg -i #{sh_escape(path)} -c:v libx264 -preset veryfast -crf 18 -c:a libmp3lame -map_metadata -1 #{sh_escape(out)} && rm #{sh_escape(path)}")
 				add_tag(out, TagUnfinished)
 			end
 			if path =~ /\.flv$/
