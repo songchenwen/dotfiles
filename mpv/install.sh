@@ -6,7 +6,7 @@ if test ! $(which mpv); then
 	sh "$MPVDIR/../brew/install.sh"
 	echo "mpv installing "
 	brew tap mpv-player/mpv
-	brew install mpv
+	brew install mpv --with-bundle
 	brew linkapps mpv
 fi
 
@@ -29,7 +29,7 @@ fi
 
 BUNDLEID=$(mdls -name kMDItemCFBundleIdentifier -r $APPFILE)
 
-EXTS=( 3GP ASF AVI FLV M4V MKV MOV MP4 MPEG MPG MPG2 MPG4 RMVB WMV )
+EXTS=( 3GP ASF AVI FLV M4V MKV MOV MP4 MPEG MPG MPG2 MPG4 RMVB WMV MTS )
 
 if test ! $(which duti); then
 	sh "$MPVDIR/../brew/install.sh"

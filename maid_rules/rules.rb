@@ -157,10 +157,10 @@ Maid.rules do
 					first = Pathname.new(expand(sameSeries[0])).basename.to_s
 					prefixLength = VideoSeriesNameMinPrefixLength
 					VideoSeriesNameMinPrefixLength.upto([name.length, first.length, VideoSeriesNameMaxPrefixLength].min) do |i|
-						prefixLength = i
 						if not name[0, i] == first[0, i] then
 							break
 						end
+						prefixLength = i
 					end
 					folderName = name[0, prefixLength]
 					dest = "~/Movies/Video/#{folderName}"
