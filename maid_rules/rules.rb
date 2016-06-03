@@ -46,8 +46,6 @@ Maid.rules do
 			Process.detach pid
 			pid = Process.spawn("gem update !psych")
 			Process.detach pid
-			pid = Process.spawn("node ~/Documents/dotfiles/bloomfilter-pac/index.js")
-			Process.detach pid
 		end
 	end
 
