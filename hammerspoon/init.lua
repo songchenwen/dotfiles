@@ -1,6 +1,21 @@
 hs.alert.closeAll()
 local ignored = require 'ignored'
 
+k = hs.hotkey.modal.new({}, "F17")
+
+-- Enter Hyper Mode when F18 (Hyper/Capslock) is pressed
+pressedF18 = function()
+  k:enter()
+end
+
+-- Leave Hyper Mode when F18 (Hyper/Capslock) is pressed,
+--   send ESCAPE if no other keys are pressed.
+releasedF18 = function()
+  k:exit()
+end
+
+f18 = hs.hotkey.bind({}, 'F18', pressedF18, releasedF18)
+
 -- key define
 local hyper = {'ctrl', 'alt', 'cmd'}
 local hyperShift = {'ctrl', 'alt', 'cmd', 'shift'}
@@ -27,17 +42,17 @@ local key2App = {
     c = 'Numi'
 }
 for key, app in pairs(key2App) do
-	hs.hotkey.bind(hyper, key, function() hs.application.launchOrFocus(app) end)
+	k:bind({}, key, nil, function() hs.application.launchOrFocus(app) end)
 end
 
 -- Hints
-hs.hotkey.bind(hyper, 'h', function() 
+k:bind({}, 'h', nil, function() 
     hs.hints.windowHints(getAllValidWindows()) 
 end)
 
 -- undo
 local undo = require 'undo'
-hs.hotkey.bind(hyper, 'z', function() undo:undo() end)
+k:bind({}, 'z', nil, function() undo:undo() end)
 
 -- Grids
 hs.grid.GRIDWIDTH = 8
@@ -48,7 +63,7 @@ hs.grid.MARGINY  = 0
 local moveMaxWidth = hs.grid.GRIDWIDTH / 2 + 1
 local moveMinWidth = hs.grid.GRIDWIDTH / 2 - 1
 
-local hyperUp = hs.hotkey.bind(hyper, 'up', function() 
+local hyperUp = k:bind({}, 'up', nil, function() 
     undo:addToStack()
     hs.grid.maximizeWindow() 
 end)
@@ -121,12 +136,12 @@ function horizontalMove(direction)
     hs.grid.set(w, g, s)
 end
 
-local hyperLeft = hs.hotkey.bind(hyper, 'left', function() horizontalMove(-1) end)
+local hyperLeft = k:bind({}, 'left', nil, function() horizontalMove(-1) end)
 
-local hyperRight = hs.hotkey.bind(hyper, 'right', function() horizontalMove(1) end)
+local hyperRight = k:bind({}, 'right', nil, function() horizontalMove(1) end)
 
 -- Move Screen
-hs.hotkey.bind(hyperShift, 'left', function() 
+k:bind({'shift'}, 'left', nil, function() 
     local w = hs.window.focusedWindow()
     if not w then 
         return
@@ -140,7 +155,7 @@ hs.hotkey.bind(hyperShift, 'left', function()
     end
 end)
 
-hs.hotkey.bind(hyperShift, 'right', function() 
+k:bind({'shift'}, 'right', nil, function() 
     local w = hs.window.focusedWindow()
     if not w then 
         return
@@ -155,12 +170,12 @@ hs.hotkey.bind(hyperShift, 'right', function()
 end)
 
 -- split view
-SplitModal = require 'split_modal'
-local splitModal = SplitModal.new(hyper, 'down', undo)
+-- SplitModal = require 'split_modal'
+-- local splitModal = SplitModal.new({'ctrl', 'alt', 'cmd'}, 'down', undo)
 
-function splitModal:hotkeysToDisable()
-    return {hyperUp, hyperRight, hyperLeft}
-end
+-- function splitModal:hotkeysToDisable()
+--     return {hyperUp, hyperRight, hyperLeft}
+-- end
 
 -- App layout
 local AppLayout = {}
@@ -248,7 +263,7 @@ local screenWatcher = hs.screen.watcher.new(screenChanged)
 screenWatcher:start()
 
 -- caffeinate
-hs.hotkey.bind(hyperShift, 'c', function() 
+k:bind({'shift'}, 'c', nil, function() 
     local c = hs.caffeinate
     if not c then return end
     if c.get('displayIdle') or c.get('systemIdle') or c.get('system') then
@@ -296,10 +311,10 @@ function menuCaffRelease()
 end
 
 -- console
-hs.hotkey.bind(hyperShift, ';', hs.openConsole)
+k:bind({'shift'}, ';', nil, hs.openConsole)
 
 -- reload
-hs.hotkey.bind(hyper, 'escape', function() hs.reload() end )
+k:bind({}, 'escape', nil, function() hs.reload() end )
 
 -- utils
 function getAllValidWindows ()

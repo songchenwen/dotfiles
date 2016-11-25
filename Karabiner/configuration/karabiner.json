@@ -1,0 +1,12 @@
+{
+    "profiles": [
+        {
+            "name": "Default profile",
+            "selected": true,
+            "devices": [],
+            "simple_modifications": {
+                "caps_lock": "f18"
+            }
+        }
+    ]
+}

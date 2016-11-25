@@ -3,6 +3,7 @@ export ANDROID_NDK_HOME=/usr/local/opt/android-ndk
 
 export PATH=$ANDROID_HOME/bin:$ANDROID_HOME/tools:$ANDROID_NDK_HOME/bin:$PATH
 export PATH="/usr/local/heroku/bin:$PATH"
+export PATH="/usr/local/lib/python2.7/site-packages:$PATH"
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
