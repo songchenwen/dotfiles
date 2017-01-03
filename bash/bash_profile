@@ -1,3 +1,5 @@
+source ~/.profile
+
 export ANDROID_HOME=/usr/local/opt/android-sdk
 export ANDROID_NDK_HOME=/usr/local/opt/android-ndk
 
@@ -5,11 +7,11 @@ export PATH=$ANDROID_HOME/bin:$ANDROID_HOME/tools:$ANDROID_NDK_HOME/bin:$PATH
 export PATH="/usr/local/heroku/bin:$PATH"
 export PATH="/usr/local/lib/python2.7/site-packages:$PATH"
 
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
 export NVM_DIR="/Users/scw/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
-
 alias capScreen='DATE=$(date +"%Y-%m-%d-%H-%M-%S");mkdir -p ~/Desktop/ScreenCap;adb shell screencap -p | perl -pe "s/\x0D\x0A/\x0A/g" > ~/Desktop/ScreenCap/Screen_$DATE.png'
 alias s2t="pbpaste | opencc -c s2twp.json | pbcopy"
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
