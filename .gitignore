@@ -7,3 +7,4 @@ fish/generated_completions
 maid_rules/run.sh
 mpv/watch_later
 mpv/tmp
+accelerate_tx.fish

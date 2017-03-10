@@ -16,30 +16,87 @@ end
 
 f18 = hs.hotkey.bind({}, 'F18', pressedF18, releasedF18)
 
--- key define
-local hyper = {'ctrl', 'alt', 'cmd'}
-local hyperShift = {'ctrl', 'alt', 'cmd', 'shift'}
-
 -- states
 hs.window.animationDuration = 0
 
 -- cli
 if not hs.ipc.cliStatus() then hs.ipc.cliInstall() end
 
+-- shift to change input method
+local shift_on_since = 0
+
+local shift_eventtap = nil
+
+function handleEventTapShift(o)
+    local keyCode = o:getKeyCode()
+    local modifiers = o:getFlags()
+    local text = o:getCharacters(true)
+    if shift_on_since > 0 then
+        if text ~= nil then
+            shift_on_since = 0
+            print('clean shift state')
+            startShiftEventTap()
+            return false
+        end
+    end
+    if o:getType() == hs.eventtap.event.types.flagsChanged then
+        if modifiers['shift'] then
+            print('begin shift on')
+            shift_on_since = hs.timer.secondsSinceEpoch()
+        else
+            print('end shift on')
+            if hs.timer.secondsSinceEpoch() - shift_on_since < 0.2 then
+                shift_on_since = 0
+                print('should change input method')
+                hs.timer.doAfter(0.1, function()
+                    input_method = hs.keycodes.currentMethod()
+                    if input_method == nil then
+                        hs.alert.closeAll()
+                        hs.alert('En')
+                    else
+                        hs.alert.closeAll()
+                        hs.alert(input_method)
+                    end
+                end)
+                startShiftEventTap()
+                return false, {hs.eventtap.event.newKeyEvent({'cmd'}, 'space', true),
+                               hs.eventtap.event.newKeyEvent({'cmd'}, 'space', false)}
+            end
+            shift_on_since = 0
+        end
+    else
+        shift_on_since = 0
+    end
+    startShiftEventTap()
+    return false
+end
+
+function startShiftEventTap()
+    if shift_eventtap ~= nil then
+        shift_eventtap:stop()
+    end
+    shift_eventtap = hs.eventtap.new({hs.eventtap.event.types.flagsChanged,
+                                  hs.eventtap.event.types.keyDown,
+                                  hs.eventtap.event.types.keyUp}, handleEventTapShift)
+    shift_eventtap:start()
+end
+
+startShiftEventTap()
+
 -- App shortcuts
 local key2App = {
 	q = 'QQ',
+    c = 'Wechat',
     w = 'Safari',
     x = 'Xcode',
-    j = 'AppCode',
     a = 'Android Studio',
+    p = 'PyCharm',
     s = 'Sublime Text 2',
+    e = 'Sequel Pro',
     g = 'SourceTree',
-    p = 'Adobe Photoshop CC',
     f = 'Finder',
     t = 'iTerm',
-    n = 'Newsflow',
-    c = 'Numi'
+    n = 'Newsflow'
 }
 for key, app in pairs(key2App) do
 	k:bind({}, key, nil, function() hs.application.launchOrFocus(app) end)
