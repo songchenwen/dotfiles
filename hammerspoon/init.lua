@@ -87,6 +87,7 @@ startShiftEventTap()
 local key2App = {
 	q = 'QQ',
     c = 'Wechat',
+    m = 'Telegram',
     w = 'Safari',
     x = 'Xcode',
     a = 'Android Studio',
@@ -95,8 +96,7 @@ local key2App = {
     e = 'Sequel Pro',
     g = 'SourceTree',
     f = 'Finder',
-    t = 'iTerm',
-    n = 'Newsflow'
+    t = 'iTerm'
 }
 for key, app in pairs(key2App) do
 	k:bind({}, key, nil, function() hs.application.launchOrFocus(app) end)
